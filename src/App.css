@@ -284,6 +284,31 @@ main section {
   width: 62%;
 }
 
+.booking-page {
+  display: grid;
+  min-height: clamp(22rem, 50vw, 32rem);
+  place-items: center;
+  background: var(--primary-green);
+  color: var(--neutral-light-gray);
+  padding: clamp(2rem, 7vw, 6rem) clamp(1rem, 5vw, 5rem);
+}
+
+.booking-page-content {
+  max-width: 38rem;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: var(--neutral-dark-gray);
+  padding: clamp(1.5rem, 4vw, 3rem);
+}
+
+.booking-page-content h1 {
+  margin-top: 0;
+}
+
+.booking-page-content p:last-child {
+  margin-bottom: 0;
+}
+
 footer {
   display: grid;
   grid-template-columns: minmax(8rem, 1.2fr) repeat(3, minmax(0, 1fr));
