@@ -1,6 +1,7 @@
 import { useReducer } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom';
 import BookingPage from './BookingPage';
+import ConfirmedBooking from './ConfirmedBooking';
 import Homepage from './Homepage';
 
 function initializeTimes() {
@@ -13,6 +14,13 @@ function updateTimes(state, selectedDate) {
 
 function Main() {
   const [availableTimes, dispatch] = useReducer(updateTimes, [], initializeTimes);
+  const navigate = useNavigate();
+
+  function submitForm(formData) {
+    if (window.submitAPI(formData)) {
+      navigate('/confirmed');
+    }
+  }
 
   return (
     <main>
@@ -20,8 +28,15 @@ function Main() {
         <Route path="/" element={<Homepage />} />
         <Route
           path="/booking"
-          element={<BookingPage availableTimes={availableTimes} dispatch={dispatch} />}
+          element={
+            <BookingPage
+              availableTimes={availableTimes}
+              dispatch={dispatch}
+              submitForm={submitForm}
+            />
+          }
         />
+        <Route path="/confirmed" element={<ConfirmedBooking />} />
       </Routes>
     </main>
   );
