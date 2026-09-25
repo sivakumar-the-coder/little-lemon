@@ -1,14 +1,15 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import BookingForm from './BookingForm';
 
 const availableTimes = ['17:00', '18:00', '19:00'];
 
-function renderBookingForm() {
+function renderBookingForm(props = {}) {
   return render(
     <BookingForm
       availableTimes={availableTimes}
       dispatch={jest.fn()}
       submitForm={jest.fn()}
+      {...props}
     />
   );
 }
@@ -50,6 +51,7 @@ test('keeps the submit button disabled when guests is zero', () => {
   });
 
   expect(screen.getByRole('button', { name: 'Make Your reservation' })).toBeDisabled();
+  expect(screen.getByRole('alert')).toHaveTextContent('Number of guests must be between 1 and 10.');
 });
 
 test('keeps the submit button disabled for a date before today', () => {
@@ -60,6 +62,17 @@ test('keeps the submit button disabled for a date before today', () => {
   });
 
   expect(screen.getByRole('button', { name: 'Make Your reservation' })).toBeDisabled();
+  expect(screen.getByRole('alert')).toHaveTextContent('Please select a date.');
+});
+
+test('shows validation feedback when a required time or occasion is cleared', () => {
+  renderBookingForm();
+
+  fireEvent.change(screen.getByLabelText('Choose time'), { target: { value: '' } });
+  fireEvent.change(screen.getByLabelText('Occasion'), { target: { value: '' } });
+
+  expect(screen.getByText('Please select a time.')).toBeInTheDocument();
+  expect(screen.getByText('Please select an occasion.')).toBeInTheDocument();
 });
 
 test('keeps the submit button disabled when time is missing', () => {
@@ -99,4 +112,37 @@ test('enables the submit button when all fields are valid', () => {
   });
 
   expect(screen.getByRole('button', { name: 'Make Your reservation' })).toBeEnabled();
+});
+
+test('shows submitting feedback and disables duplicate submission while pending', async () => {
+  let resolveSubmission;
+  const submitForm = jest.fn(() => new Promise((resolve) => {
+    resolveSubmission = resolve;
+  }));
+  renderBookingForm({ submitForm });
+
+  fireEvent.change(screen.getByLabelText('Choose date'), { target: { value: getDateString() } });
+  fireEvent.click(screen.getByRole('button', { name: 'Make Your reservation' }));
+
+  expect(submitForm).toHaveBeenCalledTimes(1);
+  expect(screen.getByRole('status')).toHaveTextContent('Submitting your reservation...');
+  expect(screen.getByRole('button', { name: 'Make Your reservation' })).toBeDisabled();
+
+  resolveSubmission(true);
+  await waitFor(() => {
+    expect(screen.getByRole('button', { name: 'Make Your reservation' })).toBeEnabled();
+  });
+});
+
+test('shows an error and stays on the form when submission fails', async () => {
+  const submitForm = jest.fn(() => Promise.resolve(false));
+  renderBookingForm({ submitForm });
+
+  fireEvent.change(screen.getByLabelText('Choose date'), { target: { value: getDateString() } });
+  fireEvent.click(screen.getByRole('button', { name: 'Make Your reservation' }));
+
+  await waitFor(() => {
+    expect(screen.getByRole('alert')).toHaveTextContent("We couldn't complete your reservation. Please try again.");
+  });
+  expect(submitForm).toHaveBeenCalledTimes(1);
 });

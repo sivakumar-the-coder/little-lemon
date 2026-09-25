@@ -16,10 +16,12 @@ function Main() {
   const [availableTimes, dispatch] = useReducer(updateTimes, [], initializeTimes);
   const navigate = useNavigate();
 
-  function submitForm(formData) {
-    if (window.submitAPI(formData)) {
+  async function submitForm(formData) {
+    const submissionSucceeded = await window.submitAPI(formData);
+    if (submissionSucceeded) {
       navigate('/confirmed');
     }
+    return submissionSucceeded;
   }
 
   return (
