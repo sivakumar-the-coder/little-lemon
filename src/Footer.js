@@ -1,7 +1,7 @@
 function Footer() {
   return (
     <footer>
-      <img src="/logo192.png" alt="Little Lemon logo" />
+      <img src="/little-lemon-logo.svg" alt="Little Lemon logo" />
 
       <section>
         <h2>Navigation</h2>
