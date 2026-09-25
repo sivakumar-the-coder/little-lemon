@@ -5,9 +5,16 @@ function BookingForm({ availableTimes, dispatch, submitForm }) {
   const [time, setTime] = useState('17:00');
   const [guests, setGuests] = useState(1);
   const [occasion, setOccasion] = useState('Birthday');
+  const today = new Date().toISOString().split('T')[0];
+  const isFormValid = Boolean(
+    date && date >= today && time && occasion && Number(guests) >= 1 && Number(guests) <= 10
+  );
 
   function handleSubmit(event) {
     event.preventDefault();
+    if (!event.currentTarget.checkValidity()) {
+      return;
+    }
     submitForm({ date, time, guests, occasion });
   }
 
@@ -26,6 +33,7 @@ function BookingForm({ availableTimes, dispatch, submitForm }) {
           type="date"
           value={date}
           onChange={handleDateChange}
+          min={today}
           required
         />
       </div>
@@ -36,6 +44,7 @@ function BookingForm({ availableTimes, dispatch, submitForm }) {
           id="res-time"
           value={time}
           onChange={(event) => setTime(event.target.value)}
+          required
         >
           {availableTimes.map((availableTime) => (
             <option key={availableTime} value={availableTime}>
@@ -51,8 +60,10 @@ function BookingForm({ availableTimes, dispatch, submitForm }) {
           id="guests"
           type="number"
           min="1"
+          max="10"
           value={guests}
           onChange={(event) => setGuests(event.target.value)}
+          required
         />
       </div>
 
@@ -62,13 +73,18 @@ function BookingForm({ availableTimes, dispatch, submitForm }) {
           id="occasion"
           value={occasion}
           onChange={(event) => setOccasion(event.target.value)}
+          required
         >
           <option value="Birthday">Birthday</option>
           <option value="Anniversary">Anniversary</option>
         </select>
       </div>
 
-      <input type="submit" value="Make Your reservation" />
+      <input
+        type="submit"
+        value="Make Your reservation"
+        disabled={!isFormValid}
+      />
     </form>
   );
 }
